@@ -8,7 +8,7 @@ type BearsItem = {
   text: string;
 };
 
-const { TodoContext } = createTodoStore<BearsItem>((set) => ({
+const BearTodo = createTodoStore<BearsItem>((set) => ({
   values: [],
   add: () => {
     //
@@ -19,6 +19,7 @@ const { TodoContext } = createTodoStore<BearsItem>((set) => ({
   isDone: () => {
     return false;
   },
+  setDone: () => {},
   get items() {
     return [];
   },

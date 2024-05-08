@@ -1,10 +1,5 @@
-import {
-  ComponentProps,
-  PropsWithChildren,
-  createContext,
-  useContext,
-} from "react";
-import { StateCreator, StoreApi, createStore, useStore } from "zustand";
+import { ComponentProps, PropsWithChildren } from "react";
+import { StateCreator, createStore, useStore } from "zustand";
 
 export type BaseItem = {
   id: string;
@@ -13,6 +8,7 @@ export type BaseItem = {
 export type BaseTodoState<Item extends BaseItem> = {
   add: (form: FormData) => void;
   isDone: (id: string) => boolean;
+  setDone: (id: string, isDone: boolean) => void;
   remove: (id: string) => void;
   reset: () => void;
   get: (id: string) => Item;
@@ -24,21 +20,21 @@ export function createTodoStore<
   State extends BaseTodoState<Item> = BaseTodoState<Item>
 >(initializer: StateCreator<State>) {
   const store = createStore<State>(initializer);
-  const TodoContext = createContext<StoreApi<State>>(store);
 
   function useTodoStore<T>(selector: (state: State) => T) {
-    const store = useContext(TodoContext);
     return useStore(store, selector);
   }
 
-  const Provider = ({ children }: PropsWithChildren) => {
-    return (
-      <TodoContext.Provider value={store}>{children}</TodoContext.Provider>
-    );
-  };
+  const useAddAction = () => useTodoStore((state) => state.add);
+  const useIsDone = (id: string) => useTodoStore((state) => state.isDone(id));
+  const useSetDone = () => useTodoStore((state) => state.setDone);
+  const useRemove = () => useTodoStore((state) => state.remove);
+  const useReset = () => useTodoStore((state) => state.reset);
+  const useItem = (id: string) => useTodoStore((state) => state.get(id));
+  const useItems = () => useTodoStore((state) => state.items);
 
   const AddForm = ({ children }: PropsWithChildren) => {
-    const add = useTodoStore((state) => state.add);
+    const add = useAddAction();
 
     const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
       event.preventDefault();
@@ -48,7 +44,95 @@ export function createTodoStore<
     return <form onSubmit={onSubmit}>{children}</form>;
   };
 
-  const Todo = { Provider, AddForm };
+  type RemoveButtonProps = PropsWithChildren<{
+    id: string;
+  }>;
 
-  return { TodoContext, useTodoStore, Todo };
+  const RemoveButton = ({ children, id }: RemoveButtonProps) => {
+    const remove = useRemove();
+
+    const onClick = () => {
+      remove(id);
+    };
+
+    return (
+      <button type="button" onClick={onClick}>
+        {children}
+      </button>
+    );
+  };
+
+  const ResetButton = ({ children }: PropsWithChildren) => {
+    const reset = useReset();
+
+    const onClick = () => {
+      reset();
+    };
+
+    return (
+      <button type="button" onClick={onClick}>
+        {children}
+      </button>
+    );
+  };
+
+  type IsDoneCheckBoxProps = ComponentProps<"input"> & {
+    id: string;
+  };
+
+  const IsDoneCheckbox = ({
+    onChange,
+    checked,
+    id,
+    ...props
+  }: IsDoneCheckBoxProps) => {
+    const isDone = useIsDone(id);
+    const setDone = useSetDone();
+
+    const onChangeInner: IsDoneCheckBoxProps["onChange"] = (event) => {
+      onChange?.(event);
+
+      if (!event.defaultPrevented) {
+        setDone(id, event.currentTarget.checked);
+      }
+    };
+
+    return (
+      <input
+        {...props}
+        checked={checked !== undefined ? checked : isDone}
+        onChange={onChangeInner}
+      />
+    );
+  };
+
+  const TodoItem = ({ children, id }: RemoveButtonProps) => {
+    const remove = useRemove();
+
+    const onClick = () => {
+      remove(id);
+    };
+
+    return (
+      <button type="button" onClick={onClick}>
+        {children}
+      </button>
+    );
+  };
+
+  return {
+    useTodoStore,
+    useAddAction,
+    useSetDone,
+    useIsDone,
+    useRemove,
+    useItem,
+    useItems,
+    useReset,
+    AddForm,
+    RemoveButton,
+    ResetButton,
+    IsDoneCheckbox,
+    TodoItem,
+  };
 }
