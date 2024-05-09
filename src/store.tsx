@@ -1,5 +1,3 @@
-import { createContext, useState } from "react";
-import { createStore, useStore } from "zustand";
 import { BaseItem, BaseTodoState, createTodoStore } from "./base";
 
 type BearsItem = BaseItem & {
@@ -40,7 +38,7 @@ const BearTodo = createTodoStore<BearsItem, BeardState>((set, get) => ({
     });
   },
   get items() {
-    return Object.values(get().map);
+    return get().ids;
   },
   remove: (id) => {
     set((current) => {
@@ -67,31 +65,46 @@ const BearTodo = createTodoStore<BearsItem, BeardState>((set, get) => ({
   },
 }));
 
-const BearStoreContext = createContext(null);
-
-export const BearStoreProvider = ({ children, initialBears }) => {
-  const [store] = useState(() =>
-    createStore((set) => ({
-      bears: initialBears,
-      actions: {
-        increasePopulation: (by) =>
-          set((state) => ({ bears: state.bears + by })),
-        removeAllBears: () => set({ bears: 0 }),
-      },
-    }))
-  );
+export const BearTodoList = () => {
+  const clone = BearTodo.useTodoStore((state) => state.clone);
 
   return (
-    <BearStoreContext.Provider value={store}>
-      {children}
-    </BearStoreContext.Provider>
+    <div>
+      <BearTodo.AddForm>
+        <label>
+          Text
+          <input name="text" />
+        </label>
+        <button>Save</button>
+      </BearTodo.AddForm>
+      <ul>
+        <BearTodo.TodoItems>
+          {(items) =>
+            items.map((itemId) => (
+              <li key={itemId}>
+                <label>
+                  <BearTodo.IsDoneCheckbox id={itemId} />
+                  Done
+                </label>
+                <BearTodo.TodoItem id={itemId}>
+                  {(item) => <p>{item?.text}</p>}
+                </BearTodo.TodoItem>
+                <button onClick={() => clone(itemId)}>Clone</button>
+                <BearTodo.RemoveButton id={itemId}>
+                  Remove
+                </BearTodo.RemoveButton>
+              </li>
+            ))
+          }
+        </BearTodo.TodoItems>
+      </ul>
+      <Debug />
+    </div>
   );
 };
 
-export const useBearStore = (selector) => {
-  const store = React.useContext(BearStoreContext);
-  if (!store) {
-    throw new Error("Missing BearStoreProvider");
-  }
-  return useStore(store, selector);
+const Debug = () => {
+  const ids = BearTodo.useTodoStore((state) => state.ids);
+  const map = BearTodo.useTodoStore((state) => state.map);
+  return <pre>{JSON.stringify({ ids, map }, null, 2)}</pre>;
 };

@@ -12,7 +12,7 @@ export type BaseTodoState<Item extends BaseItem> = {
   remove: (id: string) => void;
   reset: () => void;
   get: (id: string) => Item | undefined;
-  items: Item[];
+  items: string[];
 };
 
 export function createTodoStore<
@@ -116,11 +116,15 @@ export function createTodoStore<
   };
 
   type TodoItemsProps = {
-    children: (items: Item[]) => ReactNode;
+    children: (items: string[]) => ReactNode;
   };
 
   const TodoItems = ({ children }: TodoItemsProps) => {
-    return <>{children(useItems())}</>;
+    const items = useTodoStore((state) => state.items);
+
+    console.log("items", items);
+
+    return <>{children(items)}</>;
   };
 
   return {
