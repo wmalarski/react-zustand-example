@@ -1,36 +1,69 @@
 import { createContext, useState } from "react";
 import { createStore, useStore } from "zustand";
-import { createTodoStore } from "./base";
+import { BaseItem, BaseTodoState, createTodoStore } from "./base";
 
-type BearsItem = {
+type BearsItem = BaseItem & {
   id: string;
   isDone: boolean;
   text: string;
 };
 
-const BearTodo = createTodoStore<BearsItem>((set) => ({
-  values: [],
-  add: () => {
-    //
+type BeardState = BaseTodoState<BearsItem> & {
+  clone: (id: string) => void;
+  ids: string[];
+  map: Record<string, BearsItem>;
+};
+
+const BearTodo = createTodoStore<BearsItem, BeardState>((set, get) => ({
+  ids: [],
+  map: {},
+  add: (form) => {
+    const id = crypto.randomUUID();
+    const text = form.get("text") as string;
+    set((current) => ({
+      ids: [...current.ids, id],
+      map: { ...current.map, [id]: { id, isDone: false, text } },
+    }));
   },
-  get: () => {
-    return { id: "4", isDone: false, text: "" };
+  get: (id) => {
+    return get().map[id];
   },
-  isDone: () => {
-    return false;
+  isDone: (id) => {
+    return get().map[id]?.isDone;
   },
-  setDone: () => {},
+  setDone: (id, isDone) => {
+    set((current) => {
+      const item = current.map[id];
+      return item
+        ? { map: { ...current.map, [id]: { ...item, isDone } } }
+        : current;
+    });
+  },
   get items() {
-    return [];
+    return Object.values(get().map);
   },
-  remove: () => {
-    //
+  remove: (id) => {
+    set((current) => {
+      const copyIds = [...current.ids];
+      const copyMap = { ...current.map };
+      copyIds.splice(copyIds.indexOf(id), 1);
+      delete copyMap[id];
+      return { ids: copyIds, map: copyMap };
+    });
   },
   reset: () => {
-    //
+    set({ ids: [], map: {} });
   },
-  clone: () => {
-    //
+  clone: (id) => {
+    set((current) => {
+      const item = current.map[id];
+      if (!item) return current;
+      const newId = crypto.randomUUID();
+      return {
+        ids: [...current.ids, newId],
+        map: { ...current.map, [newId]: { ...item, id: newId } },
+      };
+    });
   },
 }));
 

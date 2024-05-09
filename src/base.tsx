@@ -1,4 +1,4 @@
-import { ComponentProps, PropsWithChildren } from "react";
+import { ComponentProps, PropsWithChildren, ReactNode } from "react";
 import { StateCreator, createStore, useStore } from "zustand";
 
 export type BaseItem = {
@@ -7,17 +7,17 @@ export type BaseItem = {
 
 export type BaseTodoState<Item extends BaseItem> = {
   add: (form: FormData) => void;
-  isDone: (id: string) => boolean;
+  isDone: (id: string) => boolean | undefined;
   setDone: (id: string, isDone: boolean) => void;
   remove: (id: string) => void;
   reset: () => void;
-  get: (id: string) => Item;
+  get: (id: string) => Item | undefined;
   items: Item[];
 };
 
 export function createTodoStore<
   Item extends BaseItem,
-  State extends BaseTodoState<Item> = BaseTodoState<Item>
+  State extends BaseTodoState<Item>
 >(initializer: StateCreator<State>) {
   const store = createStore<State>(initializer);
 
@@ -106,18 +106,21 @@ export function createTodoStore<
     );
   };
 
-  const TodoItem = ({ children, id }: RemoveButtonProps) => {
-    const remove = useRemove();
+  type TodoItemProps = {
+    children: (item?: Item) => ReactNode;
+    id: string;
+  };
 
-    const onClick = () => {
-      remove(id);
-    };
+  const TodoItem = ({ children, id }: TodoItemProps) => {
+    return <>{children(useItem(id))}</>;
+  };
 
-    return (
-      <button type="button" onClick={onClick}>
-        {children}
-      </button>
-    );
+  type TodoItemsProps = {
+    children: (items: Item[]) => ReactNode;
+  };
+
+  const TodoItems = ({ children }: TodoItemsProps) => {
+    return <>{children(useItems())}</>;
   };
 
   return {
@@ -134,5 +137,6 @@ export function createTodoStore<
     ResetButton,
     IsDoneCheckbox,
     TodoItem,
+    TodoItems,
   };
 }
