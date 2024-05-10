@@ -1,5 +1,11 @@
-import { ComponentProps, PropsWithChildren, ReactNode } from "react";
-import { StateCreator, createStore, useStore } from "zustand";
+import {
+  ComponentProps,
+  PropsWithChildren,
+  ReactNode,
+  createContext,
+  useContext,
+} from "react";
+import { StateCreator, StoreApi, createStore, useStore } from "zustand";
 
 export type BaseItem = {
   id: string;
@@ -12,7 +18,21 @@ export type BaseTodoState<Item extends BaseItem> = {
   remove: (id: string) => void;
   reset: () => void;
   get: (id: string) => Item | undefined;
-  items: string[];
+  ids: string[];
+};
+
+export const TodoContext = createContext<StoreApi<
+  BaseTodoState<BaseItem>
+> | null>(null);
+
+const useTodoContext = () => {
+  const context = useContext(TodoContext);
+
+  if (!context) {
+    throw new Error("TodoContext not defined");
+  }
+
+  return context;
 };
 
 export function createTodoStore<
@@ -24,14 +44,19 @@ export function createTodoStore<
   function useTodoStore<T>(selector: (state: State) => T) {
     return useStore(store, selector);
   }
-
   const useAddAction = () => useTodoStore((state) => state.add);
   const useIsDone = (id: string) => useTodoStore((state) => state.isDone(id));
   const useSetDone = () => useTodoStore((state) => state.setDone);
   const useRemove = () => useTodoStore((state) => state.remove);
   const useReset = () => useTodoStore((state) => state.reset);
   const useItem = (id: string) => useTodoStore((state) => state.get(id));
-  const useItems = () => useTodoStore((state) => state.items);
+  const useItems = () => useTodoStore((state) => state.ids);
+
+  const Provider = ({ children }: PropsWithChildren) => {
+    return (
+      <TodoContext.Provider value={store}>{children}</TodoContext.Provider>
+    );
+  };
 
   const AddForm = ({ children }: PropsWithChildren) => {
     const add = useAddAction();
@@ -112,7 +137,8 @@ export function createTodoStore<
   };
 
   const TodoItem = ({ children, id }: TodoItemProps) => {
-    return <>{children(useItem(id))}</>;
+    const item = useItem(id);
+    return <>{children(item as Item)}</>;
   };
 
   type TodoItemsProps = {
@@ -120,7 +146,7 @@ export function createTodoStore<
   };
 
   const TodoItems = ({ children }: TodoItemsProps) => {
-    const items = useTodoStore((state) => state.items);
+    const items = useTodoStore((state) => state.ids);
 
     console.log("items", items);
 
@@ -136,6 +162,7 @@ export function createTodoStore<
     useItem,
     useItems,
     useReset,
+    Provider,
     AddForm,
     RemoveButton,
     ResetButton,
