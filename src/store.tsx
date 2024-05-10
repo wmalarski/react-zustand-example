@@ -1,18 +1,18 @@
-import { BaseItem, BaseTodoState, createTodoStore } from "./base";
+import * as Base from "./base";
 
-type BearsItem = BaseItem & {
+type BearsItem = Base.BaseItem & {
   id: string;
   isDone: boolean;
   text: string;
 };
 
-type BeardState = BaseTodoState<BearsItem> & {
+type BeardState = Base.BaseTodoState<BearsItem> & {
   clone: (id: string) => void;
   ids: string[];
   map: Record<string, BearsItem>;
 };
 
-const BearTodo = createTodoStore<BearsItem, BeardState>((set, get) => ({
+const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
   ids: [],
   map: {},
   add: (form) => {
@@ -69,33 +69,31 @@ export const BearTodoList = () => {
   return (
     <div>
       <BearTodo.Provider>
-        <BearTodo.AddForm>
+        <Base.AddForm>
           <label>
             Text
             <input name="text" />
           </label>
           <button>Save</button>
-        </BearTodo.AddForm>
+        </Base.AddForm>
         <ul>
-          <BearTodo.TodoItems>
-            {(items) =>
-              items.map((itemId) => (
+          <Base.TodoItems>
+            {(ids) =>
+              ids.map((itemId) => (
                 <li key={itemId}>
                   <label>
-                    <BearTodo.IsDoneCheckbox id={itemId} />
+                    <Base.IsDoneCheckbox id={itemId} />
                     Done
                   </label>
                   <BearTodo.TodoItem id={itemId}>
                     {(item) => <p>{item?.text}</p>}
                   </BearTodo.TodoItem>
                   <CloneButton id={itemId} />
-                  <BearTodo.RemoveButton id={itemId}>
-                    Remove
-                  </BearTodo.RemoveButton>
+                  <Base.RemoveButton id={itemId}>Remove</Base.RemoveButton>
                 </li>
               ))
             }
-          </BearTodo.TodoItems>
+          </Base.TodoItems>
         </ul>
         <Debug />
       </BearTodo.Provider>
@@ -109,7 +107,6 @@ type CloneButtonProps = {
 
 const CloneButton = ({ id }: CloneButtonProps) => {
   const clone = BearTodo.useTodoStore((state) => state.clone);
-
   return <button onClick={() => clone(id)}>Clone</button>;
 };
 
