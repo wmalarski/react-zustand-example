@@ -1,5 +1,5 @@
 import "./App.css";
-import { BearTodoList } from "./store";
+import { BearTodoList } from "./list";
 
 const App = () => {
   return (

@@ -1,4 +1,5 @@
-import * as Base from "./base";
+import * as Base from "./todo/store";
+import * as Todo from "./todo/components";
 
 type BearsItem = Base.BaseItem & {
   id: string;
@@ -12,12 +13,15 @@ type BeardState = Base.BaseTodoState<BearsItem> & {
   map: Record<string, BearsItem>;
 };
 
+const wait = () => new Promise((resolve) => setTimeout(resolve, 500));
+
 const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
   ids: [],
   map: {},
-  add: (form) => {
+  add: async (form) => {
     const id = crypto.randomUUID();
     const text = form.get("text") as string;
+    await wait();
     set((current) => ({
       ids: [...current.ids, id],
       map: { ...current.map, [id]: { id, isDone: false, text } },
@@ -29,7 +33,8 @@ const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
   isDone: (id) => {
     return get().map[id]?.isDone;
   },
-  setDone: (id, isDone) => {
+  setDone: async (id, isDone) => {
+    await wait();
     set((current) => {
       const item = current.map[id];
       return item
@@ -37,10 +42,8 @@ const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
         : current;
     });
   },
-  get items() {
-    return get().ids;
-  },
-  remove: (id) => {
+  remove: async (id) => {
+    await wait();
     set((current) => {
       const copyIds = [...current.ids];
       const copyMap = { ...current.map };
@@ -49,10 +52,12 @@ const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
       return { ids: copyIds, map: copyMap };
     });
   },
-  reset: () => {
+  reset: async () => {
+    await wait();
     set({ ids: [], map: {} });
   },
-  clone: (id) => {
+  clone: async (id) => {
+    await wait();
     set((current) => {
       const item = current.map[id];
       if (!item) return current;
@@ -69,31 +74,32 @@ export const BearTodoList = () => {
   return (
     <div>
       <BearTodo.Provider>
-        <Base.AddForm>
+        <Todo.AddForm>
           <label>
             Text
             <input name="text" />
           </label>
           <button>Save</button>
-        </Base.AddForm>
+        </Todo.AddForm>
+        <Todo.ResetButton>Reset</Todo.ResetButton>
         <ul>
-          <Base.TodoItems>
+          <Todo.TodoItems>
             {(ids) =>
               ids.map((itemId) => (
                 <li key={itemId}>
                   <label>
-                    <Base.IsDoneCheckbox id={itemId} />
+                    <Todo.IsDoneCheckbox id={itemId} />
                     Done
                   </label>
                   <BearTodo.TodoItem id={itemId}>
                     {(item) => <p>{item?.text}</p>}
                   </BearTodo.TodoItem>
                   <CloneButton id={itemId} />
-                  <Base.RemoveButton id={itemId}>Remove</Base.RemoveButton>
+                  <Todo.RemoveButton id={itemId}>Remove</Todo.RemoveButton>
                 </li>
               ))
             }
-          </Base.TodoItems>
+          </Todo.TodoItems>
         </ul>
         <Debug />
       </BearTodo.Provider>
