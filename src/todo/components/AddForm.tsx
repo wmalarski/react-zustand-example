@@ -1,6 +1,6 @@
 import { ComponentProps } from "react";
 import { useBaseTodoContext } from "../context";
-import { AsChildProps } from "../../components/types";
+import { AsChildProps } from "../../components/utils/types";
 import { Slot } from "../../components/Slot";
 
 type AddFormProps = AsChildProps<ComponentProps<"form">, "onSubmit">;

@@ -1,3 +1,4 @@
+import { Button } from "./components/Button";
 import * as Todo from "./todo";
 
 type BearsItem = Todo.BaseItem & {
@@ -108,13 +109,15 @@ export const ListB = () => {
       <BearTodo.Provider>
         <Todo.AddForm>
           <label>
-            Text
-            <input name="text" />
+            Content
+            <input name="content" />
           </label>
-          <button>Save</button>
+          <Button>Save</Button>
         </Todo.AddForm>
         <Todo.PendingIndicator>In progress</Todo.PendingIndicator>
-        <Todo.ResetButton>Reset</Todo.ResetButton>
+        <Todo.ResetButton asChild>
+          <Button>Reset</Button>
+        </Todo.ResetButton>
         <ul>
           <Todo.TodoItems>
             {(ids) =>
@@ -129,7 +132,9 @@ export const ListB = () => {
                   </BearTodo.TodoItem>
                   <MoveUpButton itemId={itemId} />
                   <MoveDownButton itemId={itemId} />
-                  <Todo.RemoveButton itemId={itemId}>Remove</Todo.RemoveButton>
+                  <Todo.RemoveButton asChild itemId={itemId}>
+                    <Button>Remove</Button>
+                  </Todo.RemoveButton>
                 </li>
               ))
             }
@@ -147,7 +152,7 @@ type MoveUpButtonProps = {
 
 const MoveUpButton = ({ itemId }: MoveUpButtonProps) => {
   const moveUp = BearTodo.useTodoStore((state) => state.moveUp);
-  return <button onClick={() => moveUp(itemId)}>Up</button>;
+  return <Button onClick={() => moveUp(itemId)}>Up</Button>;
 };
 
 type MoveDownButtonProps = {
@@ -156,7 +161,7 @@ type MoveDownButtonProps = {
 
 const MoveDownButton = ({ itemId }: MoveDownButtonProps) => {
   const moveDown = BearTodo.useTodoStore((state) => state.moveDown);
-  return <button onClick={() => moveDown(itemId)}>Down</button>;
+  return <Button onClick={() => moveDown(itemId)}>Down</Button>;
 };
 
 const Debug = () => {

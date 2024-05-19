@@ -1,3 +1,4 @@
+import { Button } from "./components/Button";
 import * as Todo from "./todo";
 
 type BearsItem = Todo.BaseItem & {
@@ -83,10 +84,12 @@ export const ListA = () => {
             Text
             <input name="text" />
           </label>
-          <button>Save</button>
+          <Button>Save</Button>
         </Todo.AddForm>
         <Todo.PendingIndicator>Loading</Todo.PendingIndicator>
-        <Todo.ResetButton>Reset</Todo.ResetButton>
+        <Todo.ResetButton asChild>
+          <Button>Reset</Button>
+        </Todo.ResetButton>
         <ul>
           <Todo.TodoItems>
             {(ids) =>
@@ -100,7 +103,9 @@ export const ListA = () => {
                     {(item) => <p>{item?.text}</p>}
                   </BearTodo.TodoItem>
                   <CloneButton id={itemId} />
-                  <Todo.RemoveButton itemId={itemId}>Remove</Todo.RemoveButton>
+                  <Todo.RemoveButton asChild itemId={itemId}>
+                    <Button>Remove</Button>
+                  </Todo.RemoveButton>
                 </li>
               ))
             }
@@ -118,7 +123,7 @@ type CloneButtonProps = {
 
 const CloneButton = ({ id }: CloneButtonProps) => {
   const clone = BearTodo.useTodoStore((state) => state.clone);
-  return <button onClick={() => clone(id)}>Clone</button>;
+  return <Button onClick={() => clone(id)}>Clone</Button>;
 };
 
 const Debug = () => {
