@@ -105,41 +105,55 @@ const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => {
 
 export const ListB = () => {
   return (
-    <div>
+    <div className="p-8 border-1 flex flex-col gap-2 border-4 border-base-200 rounded-xl">
+      <h2 className="text-xl">Store B</h2>
       <BearTodo.Provider>
-        <Todo.AddForm>
-          <label>
-            Content
-            <input name="content" />
-          </label>
+        <Todo.AddForm className="flex w-full items-end gap-2">
+          <fieldset className="form-control w-full flex-grow">
+            <label className="label">
+              <span className="label-text">Content</span>
+            </label>
+            <input className="input input-bordered w-full" name="content" />
+          </fieldset>
           <Button>Save</Button>
         </Todo.AddForm>
-        <Todo.PendingIndicator>In progress</Todo.PendingIndicator>
         <Todo.ResetButton asChild>
           <Button>Reset</Button>
         </Todo.ResetButton>
-        <ul>
+        <ul className="flex flex-col gap-2">
           <Todo.TodoItems>
             {(ids) =>
               ids.map((itemId) => (
-                <li key={itemId}>
-                  <label>
-                    <Todo.IsDoneCheckbox itemId={itemId} />
-                    Done
-                  </label>
-                  <BearTodo.TodoItem id={itemId}>
-                    {(item) => <p>{item?.content}</p>}
-                  </BearTodo.TodoItem>
-                  <MoveUpButton itemId={itemId} />
-                  <MoveDownButton itemId={itemId} />
-                  <Todo.RemoveButton asChild itemId={itemId}>
-                    <Button>Remove</Button>
-                  </Todo.RemoveButton>
+                <li key={itemId} className="card bg-base-200">
+                  <div className="card-body">
+                    <BearTodo.TodoItem id={itemId}>
+                      {(item) => <p>{item?.content}</p>}
+                    </BearTodo.TodoItem>
+                    <div className="card-actions justify-end items-center">
+                      <div className="form-control">
+                        <label className="label cursor-pointer gap-2">
+                          <Todo.IsDoneCheckbox
+                            className="checkbox"
+                            itemId={itemId}
+                          />
+                          <span className="label-text">Finished</span>
+                        </label>
+                      </div>
+                      <MoveUpButton itemId={itemId} />
+                      <MoveDownButton itemId={itemId} />
+                      <Todo.RemoveButton asChild itemId={itemId}>
+                        <Button size="sm" variant="outline">
+                          Remove
+                        </Button>
+                      </Todo.RemoveButton>
+                    </div>
+                  </div>
                 </li>
               ))
             }
           </Todo.TodoItems>
         </ul>
+        <Todo.PendingIndicator>In progress</Todo.PendingIndicator>
         <Debug />
       </BearTodo.Provider>
     </div>
@@ -152,7 +166,11 @@ type MoveUpButtonProps = {
 
 const MoveUpButton = ({ itemId }: MoveUpButtonProps) => {
   const moveUp = BearTodo.useTodoStore((state) => state.moveUp);
-  return <Button onClick={() => moveUp(itemId)}>Up</Button>;
+  return (
+    <Button size="sm" variant="outline" onClick={() => moveUp(itemId)}>
+      Up
+    </Button>
+  );
 };
 
 type MoveDownButtonProps = {
@@ -161,7 +179,11 @@ type MoveDownButtonProps = {
 
 const MoveDownButton = ({ itemId }: MoveDownButtonProps) => {
   const moveDown = BearTodo.useTodoStore((state) => state.moveDown);
-  return <Button onClick={() => moveDown(itemId)}>Down</Button>;
+  return (
+    <Button size="sm" variant="outline" onClick={() => moveDown(itemId)}>
+      Down
+    </Button>
+  );
 };
 
 const Debug = () => {

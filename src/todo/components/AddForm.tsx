@@ -10,12 +10,13 @@ export const AddForm = ({ asChild, onSubmit, ...props }: AddFormProps) => {
 
   const add = useBaseTodoContext((state) => state.add);
 
-  const onSubmitInner: AddFormProps["onSubmit"] = (event) => {
+  const onSubmitInner: AddFormProps["onSubmit"] = async (event) => {
     onSubmit?.(event);
 
     if (!event.isDefaultPrevented()) {
       event.preventDefault();
       add(new FormData(event.currentTarget));
+      event.currentTarget.reset();
     }
   };
 
