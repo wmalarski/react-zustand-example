@@ -88,14 +88,14 @@ export const BearTodoList = () => {
               ids.map((itemId) => (
                 <li key={itemId}>
                   <label>
-                    <Todo.IsDoneCheckbox id={itemId} />
+                    <Todo.IsDoneCheckbox itemId={itemId} />
                     Done
                   </label>
                   <BearTodo.TodoItem id={itemId}>
                     {(item) => <p>{item?.text}</p>}
                   </BearTodo.TodoItem>
                   <CloneButton id={itemId} />
-                  <Todo.RemoveButton id={itemId}>Remove</Todo.RemoveButton>
+                  <Todo.RemoveButton itemId={itemId}>Remove</Todo.RemoveButton>
                 </li>
               ))
             }

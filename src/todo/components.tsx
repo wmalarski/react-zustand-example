@@ -1,78 +1,107 @@
-import { ComponentProps, PropsWithChildren, ReactNode } from "react";
+import { ComponentProps, ReactNode } from "react";
 import { useBaseTodoContext } from "./store";
+import { AsChildProps } from "../components/types";
+import { Slot } from "../components/Slot";
 
-export const AddForm = ({ children }: PropsWithChildren) => {
+type AddFormProps = AsChildProps<ComponentProps<"form">, "onSubmit">;
+
+export const AddForm = ({ asChild, onSubmit, ...props }: AddFormProps) => {
+  const Component = asChild ? Slot : "form";
+
   const add = useBaseTodoContext((state) => state.add);
 
-  const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
-    event.preventDefault();
-    add(new FormData(event.currentTarget));
+  const onSubmitInner: AddFormProps["onSubmit"] = (event) => {
+    onSubmit?.(event);
+
+    if (!event.isDefaultPrevented()) {
+      event.preventDefault();
+      add(new FormData(event.currentTarget));
+    }
   };
 
-  return <form onSubmit={onSubmit}>{children}</form>;
+  return <Component {...props} onSubmit={onSubmitInner} />;
 };
 
-type IsDoneCheckBoxProps = ComponentProps<"input"> & {
-  id: string;
-};
+type IsDoneCheckBoxProps = AsChildProps<
+  ComponentProps<"input"> & { itemId: string },
+  "checked" | "onChange" | "itemId"
+>;
 
 export const IsDoneCheckbox = ({
+  asChild,
   onChange,
-  checked,
-  id,
+  itemId,
   ...props
 }: IsDoneCheckBoxProps) => {
-  const isDone = useBaseTodoContext((state) => state.isDone(id));
+  const Component = asChild ? Slot : "input";
+
+  const isDone = useBaseTodoContext((state) => state.isDone(itemId));
   const setDone = useBaseTodoContext((state) => state.setDone);
 
   const onChangeInner: IsDoneCheckBoxProps["onChange"] = (event) => {
     onChange?.(event);
 
-    if (!event.defaultPrevented) {
-      setDone(id, event.currentTarget.checked);
+    if (!event.isDefaultPrevented()) {
+      setDone(itemId, event.currentTarget.checked);
     }
   };
 
   return (
-    <input
+    <Component
       type="checkbox"
-      checked={checked !== undefined ? checked : isDone}
-      onChange={onChangeInner}
       {...props}
+      checked={isDone}
+      onChange={onChangeInner}
     />
   );
 };
 
-type RemoveButtonProps = PropsWithChildren<{
-  id: string;
-}>;
+type RemoveButtonProps = AsChildProps<
+  ComponentProps<"button"> & { itemId: string },
+  "itemId" | "onClick"
+>;
 
-export const RemoveButton = ({ children, id }: RemoveButtonProps) => {
+export const RemoveButton = ({
+  onClick,
+  asChild,
+  itemId,
+  ...props
+}: RemoveButtonProps) => {
+  const Component = asChild ? Slot : "button";
+
   const remove = useBaseTodoContext((state) => state.remove);
 
-  const onClick = () => {
-    remove(id);
+  const onClickInner: RemoveButtonProps["onClick"] = (event) => {
+    onClick?.(event);
+
+    if (!event.isDefaultPrevented()) {
+      remove(itemId);
+    }
   };
 
-  return (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  );
+  return <Component type="button" {...props} onClick={onClickInner} />;
 };
 
-export const ResetButton = ({ children }: PropsWithChildren) => {
+type ResetButtonProps = AsChildProps<ComponentProps<"button">, "onClick">;
+
+export const ResetButton = ({
+  asChild,
+  onClick,
+  ...props
+}: ResetButtonProps) => {
+  const Component = asChild ? Slot : "button";
+
   const reset = useBaseTodoContext((state) => state.reset);
 
-  const onClick = () => {
-    reset();
+  const onClickInner: ResetButtonProps["onClick"] = (event) => {
+    onClick?.(event);
+
+    if (!event.isDefaultPrevented()) {
+      reset();
+    }
   };
 
-  return (
-    <button type="button" onClick={onClick}>
-      {children}
-    </button>
-  );
+  return <Component type="button" {...props} onClick={onClickInner} />;
 };
 
 type TodoItemsProps = {
