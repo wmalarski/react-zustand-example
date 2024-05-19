@@ -10,62 +10,69 @@ type BeardState = Todo.BaseTodoState<BearsItem> & {
   map: Record<string, BearsItem>;
 };
 
-const wait = () => new Promise((resolve) => setTimeout(resolve, 500));
+const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => {
+  const wait = async () => {
+    set({ pending: true });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    set({ pending: false });
+  };
 
-const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => ({
-  ids: [],
-  map: {},
-  add: async (form) => {
-    const id = crypto.randomUUID();
-    const text = form.get("text") as string;
-    await wait();
-    set((current) => ({
-      ids: [...current.ids, id],
-      map: { ...current.map, [id]: { id, isDone: false, text } },
-    }));
-  },
-  get: (id) => {
-    return get().map[id];
-  },
-  isDone: (id) => {
-    return get().map[id]?.isDone;
-  },
-  setDone: async (id, isDone) => {
-    await wait();
-    set((current) => {
-      const item = current.map[id];
-      return item
-        ? { map: { ...current.map, [id]: { ...item, isDone } } }
-        : current;
-    });
-  },
-  remove: async (id) => {
-    await wait();
-    set((current) => {
-      const copyIds = [...current.ids];
-      const copyMap = { ...current.map };
-      copyIds.splice(copyIds.indexOf(id), 1);
-      delete copyMap[id];
-      return { ids: copyIds, map: copyMap };
-    });
-  },
-  reset: async () => {
-    await wait();
-    set({ ids: [], map: {} });
-  },
-  clone: async (id) => {
-    await wait();
-    set((current) => {
-      const item = current.map[id];
-      if (!item) return current;
-      const newId = crypto.randomUUID();
-      return {
-        ids: [...current.ids, newId],
-        map: { ...current.map, [newId]: { ...item, id: newId } },
-      };
-    });
-  },
-}));
+  return {
+    ids: [],
+    map: {},
+    pending: false,
+    add: async (form) => {
+      const id = crypto.randomUUID();
+      const text = form.get("text") as string;
+      await wait();
+      set((current) => ({
+        ids: [...current.ids, id],
+        map: { ...current.map, [id]: { id, isDone: false, text } },
+      }));
+    },
+    get: (id) => {
+      return get().map[id];
+    },
+    isDone: (id) => {
+      return get().map[id]?.isDone;
+    },
+    setDone: async (id, isDone) => {
+      await wait();
+      set((current) => {
+        const item = current.map[id];
+        return item
+          ? { map: { ...current.map, [id]: { ...item, isDone } } }
+          : current;
+      });
+    },
+    remove: async (id) => {
+      await wait();
+      set((current) => {
+        const copyIds = [...current.ids];
+        const copyMap = { ...current.map };
+        copyIds.splice(copyIds.indexOf(id), 1);
+        delete copyMap[id];
+        return { ids: copyIds, map: copyMap };
+      });
+    },
+    reset: async () => {
+      await wait();
+      set({ ids: [], map: {} });
+    },
+    clone: async (id) => {
+      await wait();
+      set((current) => {
+        const item = current.map[id];
+        if (!item) return current;
+        const newId = crypto.randomUUID();
+        return {
+          ids: [...current.ids, newId],
+          map: { ...current.map, [newId]: { ...item, id: newId } },
+        };
+      });
+    },
+  };
+});
 
 export const ListA = () => {
   return (
@@ -78,6 +85,7 @@ export const ListA = () => {
           </label>
           <button>Save</button>
         </Todo.AddForm>
+        <Todo.PendingProgress>Loading</Todo.PendingProgress>
         <Todo.ResetButton>Reset</Todo.ResetButton>
         <ul>
           <Todo.TodoItems>

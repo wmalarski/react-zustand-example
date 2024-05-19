@@ -11,91 +11,98 @@ type BeardState = Todo.BaseTodoState<BearsItem> & {
   items: BearsItem[];
 };
 
-const wait = () => new Promise((resolve) => setTimeout(resolve, 500));
+const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => {
+  const wait = async () => {
+    set({ pending: true });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    set({ pending: false });
+  };
 
-const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => ({
-  ids: [],
-  items: [],
-  add: async (form) => {
-    const id = crypto.randomUUID();
-    const content = form.get("content") as string;
-    await wait();
-    set((current) => {
-      return {
-        ids: [...current.ids, id],
-        items: [...current.items, { content, id, finished: false }],
-      };
-    });
-  },
-  get: (id) => {
-    return get().items.find((item) => item.id === id);
-  },
-  isDone: (id) => {
-    return get().items.find((item) => item.id === id)?.finished;
-  },
-  setDone: async (id, isDone) => {
-    await wait();
-    set((current) => {
-      const index = current.items.findIndex((item) => item.id === id);
-      const item = current.items[index];
-      if (!item) return current;
+  return {
+    ids: [],
+    items: [],
+    pending: false,
+    add: async (form) => {
+      const id = crypto.randomUUID();
+      const content = form.get("content") as string;
+      await wait();
+      set((current) => {
+        return {
+          ids: [...current.ids, id],
+          items: [...current.items, { content, id, finished: false }],
+        };
+      });
+    },
+    get: (id) => {
+      return get().items.find((item) => item.id === id);
+    },
+    isDone: (id) => {
+      return get().items.find((item) => item.id === id)?.finished;
+    },
+    setDone: async (id, isDone) => {
+      await wait();
+      set((current) => {
+        const index = current.items.findIndex((item) => item.id === id);
+        const item = current.items[index];
+        if (!item) return current;
 
-      const itemsCopy = [...current.items];
-      itemsCopy.splice(index, 1, { ...item, finished: isDone });
+        const itemsCopy = [...current.items];
+        itemsCopy.splice(index, 1, { ...item, finished: isDone });
 
-      return { items: itemsCopy };
-    });
-  },
-  remove: async (id) => {
-    await wait();
-    set((current) => {
-      const copyIds = [...current.ids];
-      const copyItems = [...current.items];
+        return { items: itemsCopy };
+      });
+    },
+    remove: async (id) => {
+      await wait();
+      set((current) => {
+        const copyIds = [...current.ids];
+        const copyItems = [...current.items];
 
-      const index = copyIds.indexOf(id);
-      copyIds.splice(index, 1);
-      copyItems.splice(index, 1);
+        const index = copyIds.indexOf(id);
+        copyIds.splice(index, 1);
+        copyItems.splice(index, 1);
 
-      return { ids: copyIds, items: copyItems };
-    });
-  },
-  reset: async () => {
-    await wait();
-    set({ ids: [], items: [] });
-  },
-  moveUp: async (id) => {
-    await wait();
-    set((current) => {
-      const copyIds = [...current.ids];
-      const copyItems = [...current.items];
-      const index = copyIds.indexOf(id);
+        return { ids: copyIds, items: copyItems };
+      });
+    },
+    reset: async () => {
+      await wait();
+      set({ ids: [], items: [] });
+    },
+    moveUp: async (id) => {
+      await wait();
+      set((current) => {
+        const copyIds = [...current.ids];
+        const copyItems = [...current.items];
+        const index = copyIds.indexOf(id);
 
-      if (index < 1) return current;
+        if (index < 1) return current;
 
-      copyIds.splice(index - 1, 2, copyIds[index], copyIds[index - 1]);
-      copyItems.splice(index - 1, 2, copyItems[index], copyItems[index - 1]);
+        copyIds.splice(index - 1, 2, copyIds[index], copyIds[index - 1]);
+        copyItems.splice(index - 1, 2, copyItems[index], copyItems[index - 1]);
 
-      return { ids: copyIds, items: copyItems };
-    });
-  },
-  moveDown: async (id) => {
-    await wait();
-    set((current) => {
-      const copyIds = [...current.ids];
-      const copyItems = [...current.items];
-      const index = copyIds.indexOf(id);
+        return { ids: copyIds, items: copyItems };
+      });
+    },
+    moveDown: async (id) => {
+      await wait();
+      set((current) => {
+        const copyIds = [...current.ids];
+        const copyItems = [...current.items];
+        const index = copyIds.indexOf(id);
 
-      if (index > copyIds.length - 2) return current;
+        if (index > copyIds.length - 2) return current;
 
-      copyIds.splice(index, 2, copyIds[index + 1], copyIds[index]);
-      copyItems.splice(index, 2, copyItems[index + 1], copyItems[index]);
+        copyIds.splice(index, 2, copyIds[index + 1], copyIds[index]);
+        copyItems.splice(index, 2, copyItems[index + 1], copyItems[index]);
 
-      return { ids: copyIds, items: copyItems };
-    });
-  },
-}));
+        return { ids: copyIds, items: copyItems };
+      });
+    },
+  };
+});
 
-export const BearTodoList = () => {
+export const ListB = () => {
   return (
     <div>
       <BearTodo.Provider>
@@ -106,6 +113,7 @@ export const BearTodoList = () => {
           </label>
           <button>Save</button>
         </Todo.AddForm>
+        <Todo.PendingProgress>In progress</Todo.PendingProgress>
         <Todo.ResetButton>Reset</Todo.ResetButton>
         <ul>
           <Todo.TodoItems>

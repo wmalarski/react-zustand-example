@@ -13,6 +13,7 @@ export type BaseTodoState<Item extends BaseItem> = {
   reset: () => void;
   get: (id: string) => Item | undefined;
   ids: string[];
+  pending: boolean;
 };
 
 export const BaseTodoContext = createContext<StoreApi<
