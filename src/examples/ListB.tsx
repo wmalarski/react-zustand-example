@@ -189,5 +189,7 @@ const MoveDownButton = ({ itemId }: MoveDownButtonProps) => {
 const Debug = () => {
   const ids = BearTodo.useTodoStore((state) => state.ids);
   const items = BearTodo.useTodoStore((state) => state.items);
-  return <pre>{JSON.stringify({ ids, items }, null, 2)}</pre>;
+  return (
+    <pre className="text-sm">{JSON.stringify({ ids, items }, null, 2)}</pre>
+  );
 };

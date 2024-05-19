@@ -147,5 +147,5 @@ const CloneButton = ({ id }: CloneButtonProps) => {
 const Debug = () => {
   const ids = BearTodo.useTodoStore((state) => state.ids);
   const map = BearTodo.useTodoStore((state) => state.map);
-  return <pre>{JSON.stringify({ ids, map }, null, 2)}</pre>;
+  return <pre className="text-sm">{JSON.stringify({ ids, map }, null, 2)}</pre>;
 };
