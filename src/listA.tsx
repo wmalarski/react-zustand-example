@@ -85,7 +85,7 @@ export const ListA = () => {
           </label>
           <button>Save</button>
         </Todo.AddForm>
-        <Todo.PendingProgress>Loading</Todo.PendingProgress>
+        <Todo.PendingIndicator>Loading</Todo.PendingIndicator>
         <Todo.ResetButton>Reset</Todo.ResetButton>
         <ul>
           <Todo.TodoItems>

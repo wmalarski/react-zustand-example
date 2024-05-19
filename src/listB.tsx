@@ -113,7 +113,7 @@ export const ListB = () => {
           </label>
           <button>Save</button>
         </Todo.AddForm>
-        <Todo.PendingProgress>In progress</Todo.PendingProgress>
+        <Todo.PendingIndicator>In progress</Todo.PendingIndicator>
         <Todo.ResetButton>Reset</Todo.ResetButton>
         <ul>
           <Todo.TodoItems>
