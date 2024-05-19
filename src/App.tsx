@@ -1,5 +1,5 @@
-import { ListA } from "./listA";
-import { ListB } from "./listB";
+import { ListA } from "./examples/ListA";
+import { ListB } from "./examples/ListB";
 
 const App = () => {
   return (

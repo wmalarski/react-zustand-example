@@ -1,5 +1,5 @@
-import { Button } from "./components/Button";
-import * as Todo from "./todo";
+import { Button } from "../components/Button";
+import * as Todo from "../todo";
 
 type BearsItem = Todo.BaseItem & {
   finished: boolean;
