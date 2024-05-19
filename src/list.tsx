@@ -1,21 +1,19 @@
-import * as Base from "./todo/store";
-import * as Todo from "./todo/components";
+import * as Todo from "./todo";
 
-type BearsItem = Base.BaseItem & {
+type BearsItem = Todo.BaseItem & {
   id: string;
   isDone: boolean;
   text: string;
 };
 
-type BeardState = Base.BaseTodoState<BearsItem> & {
+type BeardState = Todo.BaseTodoState<BearsItem> & {
   clone: (id: string) => void;
-  ids: string[];
   map: Record<string, BearsItem>;
 };
 
 const wait = () => new Promise((resolve) => setTimeout(resolve, 500));
 
-const BearTodo = Base.createTodoStore<BearsItem, BeardState>((set, get) => ({
+const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => ({
   ids: [],
   map: {},
   add: async (form) => {
