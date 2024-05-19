@@ -30,5 +30,5 @@ export function createTodoStore<
     return <>{children(item)}</>;
   };
 
-  return { useTodoStore, Provider, TodoItem };
+  return { useTodoStore, Provider, TodoItem, store };
 }

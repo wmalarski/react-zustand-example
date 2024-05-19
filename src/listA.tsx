@@ -1,7 +1,6 @@
 import * as Todo from "./todo";
 
 type BearsItem = Todo.BaseItem & {
-  id: string;
   isDone: boolean;
   text: string;
 };
@@ -68,7 +67,7 @@ const BearTodo = Todo.createTodoStore<BearsItem, BeardState>((set, get) => ({
   },
 }));
 
-export const BearTodoList = () => {
+export const ListA = () => {
   return (
     <div>
       <BearTodo.Provider>

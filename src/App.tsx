@@ -1,10 +1,10 @@
 import "./App.css";
-import { BearTodoList } from "./list";
+import { ListA } from "./listA";
 
 const App = () => {
   return (
     <>
-      <BearTodoList />
+      <ListA />
     </>
   );
 };
